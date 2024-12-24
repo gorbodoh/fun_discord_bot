@@ -3,7 +3,7 @@ using Discord.WebSocket;
 
 public class Program
 {
-    private static DiscordSocketClient _client;
+    private static DiscordSocketClient _client = new DiscordSocketClient();
 
     public static async Task Main()
     {
