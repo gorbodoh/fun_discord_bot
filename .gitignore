@@ -401,3 +401,4 @@ FodyWeavers.xsd
 
 # Discord token should be private.
 *token.txt
+*cryptokey.json

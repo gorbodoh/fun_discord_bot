@@ -1,29 +1,42 @@
 ﻿using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
 
 public class Program
 {
-    private static DiscordSocketClient _client = new DiscordSocketClient();
+    private static DiscordSocketClient _discordSocketClient = new DiscordSocketClient();
 
     public static async Task Main()
     {
-        _client = new DiscordSocketClient();
+        DiscordSocketConfig discordSocketConfig = new DiscordSocketConfig { MessageCacheSize = 100 };
+        _discordSocketClient = new DiscordSocketClient(discordSocketConfig);
 
-        _client.Log += Log;
+        _discordSocketClient.Log += Log;
 
         String token = File.ReadAllText(Directory.GetCurrentDirectory() + "\\token.txt");
-        Console.WriteLine(token);
+        await _discordSocketClient.LoginAsync(TokenType.Bot, token);
+        await _discordSocketClient.StartAsync();
 
-        await _client.LoginAsync(TokenType.Bot, token);
-        await _client.StartAsync();
+        _discordSocketClient.MessageUpdated += MessageUpdated;
+        _discordSocketClient.Ready += () =>
+        {
+            Console.WriteLine("Bot is connected!");
+            return Task.CompletedTask;
+        };
 
         // Block this task until the program is closed.
         await Task.Delay(-1);
     }
 
-    private static Task Log(LogMessage msg)
+    private static Task Log(LogMessage logMessage)
     {
-        Console.WriteLine(msg.ToString());
+        Console.WriteLine(logMessage.ToString());
         return Task.CompletedTask;
+    }
+
+    private static async Task MessageUpdated(Cacheable<IMessage, ulong> before, SocketMessage after, ISocketMessageChannel channel)
+    {
+        var message = await before.GetOrDownloadAsync();
+        Console.WriteLine($"{message} -> {after}");
     }
 }
